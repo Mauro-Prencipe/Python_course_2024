@@ -22,4 +22,4 @@ The data_files folders contains data read or written by the codes in the noteboo
 The Python files plot.py and einstein_fit.py are required by the General_fit notebook serie
 
 The File requirements.txt contains all the libraries to be installed by the command
-pip -r requirements.txt
+pip install -r requirements.txt
