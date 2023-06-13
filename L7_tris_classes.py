@@ -74,7 +74,7 @@ class Data(Stat):
         self.richter_fit=None
         self.nz_log_counts=None
         self.nz_mag=None
-        self._bins=20
+        self.__bins=20
         
         
     def set_data(self, type_of_data, val):
@@ -98,11 +98,11 @@ class Data(Stat):
                 
     @property
     def bins(self):
-        return self._bins
+        return self.__bins
     
     @bins.setter
     def bins(self, bins_value):
-        self._bins=bins_value
+        self.__bins=bins_value
                          
            
     def richter(self, mgm=0, mgx=0, d_min=0, d_max=0): 
