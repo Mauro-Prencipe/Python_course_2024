@@ -101,6 +101,20 @@ class Data(Stat):
             case other:
                 print(f"{type_of_data} not implemented")
                 
+    def __add__(self, other):
+        if Data.flag_array:
+           print("Data set summation is not possible in 'array mode'")
+           return
+       
+        new_name=self.name+'_'+other.name
+        new = Data(new_name)
+        new.magnitude=np.append(self.magnitude, other.magnitude)
+        new.depth=np.append(self.depth, other.depth)
+        new.flag_ready=True
+        
+        return new
+        
+                
     @property
     def bins(self):
         return self.__bins
@@ -333,10 +347,10 @@ class Data(Stat):
         
         for region in cls.region_names:
             if not cls.flag_array:
-               eval(region).describe()
+                eval(region).describe()
             else:
-               ipos=cls.region_dictionary[region]
-               cls.region_array[ipos].describe()
+                ipos=cls.region_dictionary[region]
+                cls.region_array[ipos].describe()
                    
         print("-"*35)
             
@@ -391,15 +405,15 @@ def start(path='data_files', info_file='L7_tris_info.dat'):
     
 if __name__ == "__main__":
     
-    global rd, ra 
+#    global rd, ra 
     start()
         
     for region in Data.region_names:
         exec(region + ' = Data(region)')
                 
     Data.setup() 
-    Data.set_array
-    rd, ra=Data.get_dataset()    
+#    Data.set_array
+#    rd, ra=Data.get_dataset()    
     
 
     
