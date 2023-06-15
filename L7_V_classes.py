@@ -295,7 +295,24 @@ class Data(Stat):
 
     
     @classmethod
-    def set_array(cls):               
+    def set_array(cls, out=False):  
+        """
+        Prepares and (optionally) returns a dictionary for regions and 
+        an array of Data class sets for each region; each position in 
+        the array is associated with a key in the dictionary
+        
+        Input:
+            out: if True, a dictionaru and dataset array are returned
+                 (default False)
+        
+        Examples:
+            >>> rd, dataset=Data.set_array(out=True)
+            >>> dataset[rd['sicilia']].richter()
+            
+            >>> for ir in range(Data.number_of_sets):
+                    dataset[ir].richter()
+        """     
+        
         number_list=list(range(cls.number_of_sets))
         l_set=list(iset for iset in cls.region_names_for_dictionary)
         cls.flag_array=True
@@ -306,6 +323,9 @@ class Data(Stat):
             cls.region_array[ipos]=cls(Data.region_names[ipos])
             
         cls.setup()
+        
+        if out:
+            return cls.region_dictionary, cls.region_array
         
     @classmethod
     def reset_array(cls):
@@ -398,13 +418,11 @@ class Data(Stat):
 # was set
 
 def describe(region_name):
-#    Data.set_array()
-    rd, ra=Data.get_dataset()
+    rd, ra=Data.set_array(out=True)
     ra[rd[region_name]].describe()
 
 def richter(region_name, bins=20, mgm=0, mgx=0, d_min=0, d_max=0, plot=False):
-    Data.set_array()
-    rd, ra=Data.get_dataset()
+    rd, ra=Data.set_array(out=True)
     
     if bins != 20:
        ra[rd[region_name]].bins=bins
@@ -412,8 +430,7 @@ def richter(region_name, bins=20, mgm=0, mgx=0, d_min=0, d_max=0, plot=False):
     ra[rd[region_name]].richter(mgm, mgx, d_min, d_max, plot=plot)  
     
 def depth_distribution(region_name):
-    Data.set_array()
-    rd, ra=Data.get_dataset()
+    rd, ra=Data.set_array(out=True)
     Data.depth_distribution(ra[rd[region_name]])
     
 
