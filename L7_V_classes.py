@@ -45,7 +45,7 @@ class Stat():
                  self.depth_min=np.min(self.depth)
                  self.depth_max=np.max(self.depth)
                     
-              print("data-set: %s" % self.name)
+              print("data-set: %s" % self.name_for_dictionary)
               print("Size: %4i" % self.size)
               print("Minimum magnitude:  %5.2f" % self.min_mag)
               print("Maximum magnitude:  %5.2f" % self.max_mag)
@@ -65,12 +65,15 @@ class Stat():
 class Data(Stat):
     number_of_sets=0 
     flag_array=False
+    n_new_var=0
+    new=np.array([], dtype='object')
     
     def __init__(self, name):
                 
         self.magnitude=None
         self.depth=None
         self.name=name
+        self.name_for_dictionary=name
         self.ave=0.
         self.std=0.
         self.flag=False
@@ -102,17 +105,29 @@ class Data(Stat):
                 print(f"{type_of_data} not implemented")
                 
     def __add__(self, other):
+        global new_temp
         if Data.flag_array:
            print("Data set summation is not possible in 'array mode'")
            return
        
         new_name=self.name+'_'+other.name
-        new = Data(new_name)
-        new.magnitude=np.append(self.magnitude, other.magnitude)
-        new.depth=np.append(self.depth, other.depth)
-        new.flag_ready=True
         
-        return new
+        Data.new=np.append(Data.new, Data(new_name))
+        Data.new[Data.n_new_var] = Data(new_name)
+        Data.new[Data.n_new_var].magnitude=np.append(self.magnitude, other.magnitude)
+        Data.new[Data.n_new_var].depth=np.append(self.depth, other.depth)
+        Data.new[Data.n_new_var].name_for_dictionary=new_name
+        Data.new[Data.n_new_var].flag_ready=True
+        
+        vname='Data.new['+str(Data.n_new_var)+']'
+        Data.region_names.append(vname)
+        Data.region_names_for_dictionary.append(new_name)
+        Data.number_of_sets += 1
+        
+        new_temp=Data.new[Data.n_new_var]
+        Data.n_new_var += 1
+        
+        return new_temp
         
                 
     @property
@@ -258,6 +273,7 @@ class Data(Stat):
         """
         
         cls.region_names=[]
+        cls.region_names_for_dictionary=[]
         cls.region_files=[]
         file=path+'/'+info
         fi=open(file)
@@ -271,6 +287,8 @@ class Data(Stat):
             line=line.split()
             cls.region_files.append(line[0])
             cls.region_names.append(line[1])
+            cls.region_names_for_dictionary.append(line[1])
+            
             
         cls.path=path        
         cls.number_of_sets=num_lines
@@ -279,13 +297,13 @@ class Data(Stat):
     @classmethod
     def set_array(cls):               
         number_list=list(range(cls.number_of_sets))
-        l_set=list(iset for iset in cls.region_names)
+        l_set=list(iset for iset in cls.region_names_for_dictionary)
         cls.flag_array=True
-        cls.region_dictionary=dict(zip(cls.region_names, number_list))
+        cls.region_dictionary=dict(zip(cls.region_names_for_dictionary, number_list))
         cls.region_array=np.array(number_list, dtype='object')
-        for name in cls.region_names:
+        for name in cls.region_dictionary:
             ipos=cls.region_dictionary[name]
-            cls.region_array[ipos]=cls(name)
+            cls.region_array[ipos]=cls(Data.region_names[ipos])
             
         cls.setup()
         
@@ -297,10 +315,12 @@ class Data(Stat):
     @classmethod
     def setup(cls):
         
+        ibase=0
         for region, file in zip(cls.region_names, cls.region_files):
             idata=pd.read_csv(cls.path+'/'+file, sep='|')
             idata.rename(columns={"Depth/Km": "Depth"}, inplace=True)
-            
+            ibase += 1
+         
             if not cls.flag_array:
                try:
                   eval(region).set_data('magnitude', idata.Magnitude)
@@ -316,9 +336,13 @@ class Data(Stat):
                cls.region_array[ipos].set_data('magnitude', idata.Magnitude)
                cls.region_array[ipos].set_data('depth', idata.Depth)
                cls.region_array[ipos].flag_ready=True
-                     
                
-            
+        for nvar in range(cls.n_new_var):
+                cls.region_array[nvar+ibase].set_data('magnitude', cls.new[nvar].magnitude)
+                cls.region_array[nvar+ibase].set_data('depth', cls.new[nvar].depth)
+                cls.region_array[nvar+ibase].name_for_dictionary=cls.new[nvar].name
+                cls.region_array[nvar+ibase].flag_ready=True
+                
     @classmethod
     def get_dataset(cls):
         """
@@ -343,25 +367,27 @@ class Data(Stat):
     @classmethod
     def describe_all(cls):
         print(f"Number of datasets: {cls.number_of_sets}")
-        print(f"Regions: {cls.region_names}\n")
+        print(f"Regions: {cls.region_names_for_dictionary}\n")
         
-        for region in cls.region_names:
+        for region, region_dictionary in zip(cls.region_names, cls.region_names_for_dictionary):
             if not cls.flag_array:
                 eval(region).describe()
             else:
-                ipos=cls.region_dictionary[region]
+                ipos=cls.region_dictionary[region_dictionary]
                 cls.region_array[ipos].describe()
                    
         print("-"*35)
             
     @classmethod
     def richter_all(cls, mgm=0, mgx=0, d_min=0, d_max=0, plot=False):
-        for region in cls.region_names:
+        for region, region_dictionary in zip(cls.region_names, cls.region_names_for_dictionary):
             if not cls.flag_array:
                eval(region).richter(mgm, mgx, d_min, d_max, plot=plot)
+               print("")
             else:
-                ipos=cls.region_dictionary[region]
+                ipos=cls.region_dictionary[region_dictionary]
                 cls.region_array[ipos].richter(mgm, mgx, d_min, d_max, plot=plot)
+                print("")
                 
         print("")
         print("-"*35)
@@ -372,9 +398,13 @@ class Data(Stat):
 # was set
 
 def describe(region_name):
+#    Data.set_array()
+    rd, ra=Data.get_dataset()
     ra[rd[region_name]].describe()
 
 def richter(region_name, bins=20, mgm=0, mgx=0, d_min=0, d_max=0, plot=False):
+    Data.set_array()
+    rd, ra=Data.get_dataset()
     
     if bins != 20:
        ra[rd[region_name]].bins=bins
@@ -382,6 +412,8 @@ def richter(region_name, bins=20, mgm=0, mgx=0, d_min=0, d_max=0, plot=False):
     ra[rd[region_name]].richter(mgm, mgx, d_min, d_max, plot=plot)  
     
 def depth_distribution(region_name):
+    Data.set_array()
+    rd, ra=Data.get_dataset()
     Data.depth_distribution(ra[rd[region_name]])
     
 
@@ -405,14 +437,14 @@ def start(path='data_files', info_file='L7_tris_info.dat'):
     
 if __name__ == "__main__":
     
-#    global rd, ra 
+#   global rd, ra 
     start()
         
     for region in Data.region_names:
         exec(region + ' = Data(region)')
                 
     Data.setup() 
-#    Data.set_array
+#    Data.set_array()
 #    rd, ra=Data.get_dataset()    
     
 
