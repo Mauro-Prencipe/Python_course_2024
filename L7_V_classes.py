@@ -81,7 +81,7 @@ class Data(Stat):
         self.richter_fit=None
         self.nz_log_counts=None
         self.nz_mag=None
-        self.__bins=20
+        self._bins=20
         self.flag_ready=False
         
         
@@ -132,16 +132,16 @@ class Data(Stat):
                 
     @property
     def bins(self):
-        return self.__bins
+        return self._bins
     
     @bins.setter
     def bins(self, bins_value):
         
         if bins_value <= 2:
-           self.__bins=2
+           self._bins=2
            print("bins cannot be lower than 2.\nValue set to 2")
         else:
-           self.__bins=bins_value
+           self._bins=bins_value
                          
            
     def richter(self, mgm=0, mgx=0, d_min=0, d_max=0, bins=0, plot=False): 
@@ -449,7 +449,7 @@ def depth_distribution(region_name):
     
 # ---- starting functions ---- 
        
-def start(path='data_files', info_file='L7_tris_info.dat'):    
+def start(path='L8_data_files', info_file='info.dat'):    
     Data.read_info(path, info_file) 
     
 if __name__ == "__main__":
