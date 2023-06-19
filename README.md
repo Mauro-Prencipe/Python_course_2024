@@ -10,14 +10,16 @@ Notebooks should be followed in the order given below
 4)    files
 5)    variable_scoping
 6)    classes
-7)    least_squares
-8)    advanced_matplotlib
-9)    General_fits
-10)   General_fit_revised
-11)   General_fit_revised_2
+7)    classes: advanced
+8)    least_squares
+9)    advanced_matplotlib
+10)   General_fits
+11)   General_fit_revised
+12)   General_fit_revised_2
 
 
-The data_files folders contains data read or written by the codes in the notebooks
+The data_files folder contains data read or written by the codes in the notebooks.
+The L7_data_files folder is required for the L7_classes_advanced notebook.
 
 The Python files plot.py and einstein_fit.py are required by the General_fit notebook serie
 
