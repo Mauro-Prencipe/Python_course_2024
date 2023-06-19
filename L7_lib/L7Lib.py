@@ -83,6 +83,8 @@ class Data(Stat):
         fi.close()
         text=text.rstrip().splitlines()
         num_lines=len(text)
+        cls.obj_names=[]
+        cls.obj_files=[]
         cls.number_of_obj=num_lines
              
         for line in text:
@@ -113,7 +115,8 @@ class Data(Stat):
                     
             
     @classmethod
-    def set_array(cls, out=False):  
+    def set_array(cls, out=False): 
+        
         cls.flag_array=True
         number_list=list(range(len(cls.obj_names)))
         l_set=list(iset for iset in cls.obj_names)        
