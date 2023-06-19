@@ -8,3 +8,4 @@ datetime
 pyQt5
 jupyter
 spyder
+numba
