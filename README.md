@@ -1,6 +1,6 @@
 # Python_course_2024
 
-Python codes and associated notebooks for the PhD course on Python programming (2022)
+Python codes and associated notebooks for the PhD course on Python programming (2024)
 
 Notebooks should be followed in the order given below
 
