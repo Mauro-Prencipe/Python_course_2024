@@ -116,7 +116,7 @@ def einstein_fit(name, model=1):
                       p0=guess, xtol=1e-15, ftol=1e-15)
         
     if model == 1:
-       print("Einstein temperature:   %5.1f (K)" % ein_fit)
+       print("Einstein temperature:   %5.1f (K)" % ein_fit[0])
     else:        
        print("Einstein temperatures:  %5.1f, %5.1f (K)" % (ein_fit[0], ein_fit[1]))
     
