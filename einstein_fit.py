@@ -5,22 +5,27 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import plot 
 
-class einstein_class():
-    def __init__(self):
-        self.avo=6.02214179e+23
-        self.kb=1.3806505e-23
-        self.apfu=1
-        
-    def einstein_fun(self, tt, eps):    
-        return self.apfu*3*self.avo*self.kb*((eps/tt)**2)*np.exp(eps/tt)/((np.exp(eps/tt)-1)**2)
-    
-    def einstein_2_fun(self,tt,eps1,eps2):
-        f1=self.apfu*3*self.avo*self.kb/2.
+class Einstein():
+    avo=6.02214179e+23
+    kb=1.3806505e-23
+    apfu=1
+
+    @classmethod
+    def set_apfu(cls, apfu):
+        cls.apfu=apfu
+
+    @classmethod
+    def einstein_fun(cls, tt, eps):    
+        return cls.apfu*3*cls.avo*cls.kb*((eps/tt)**2)*np.exp(eps/tt)/((np.exp(eps/tt)-1)**2)
+
+    @classmethod
+    def einstein_2_fun(cls,tt,eps1,eps2):
+        f1=cls.apfu*3*cls.avo*cls.kb/2.
         f2=((eps1/tt)**2)*np.exp(eps1/tt)/((np.exp(eps1/tt)-1)**2)
         f3=((eps2/tt)**2)*np.exp(eps2/tt)/((np.exp(eps2/tt)-1)**2)
         return f1*(f2+f3)
     
-class data_class():
+class Data():
     def __init__(self, name, filename, apfu):
         self.name=name
         self.filename=filename
@@ -38,6 +43,8 @@ class data_class():
         self.model=1
         self.fit1=[]
         self.fit2=[]
+        self.fit1_error=None
+        self.fit2_error=None
         self.fit_flag=[False, False]
         self.n_plot=100
         self.selection_flag=False
@@ -96,23 +103,21 @@ class data_class():
            if self.fit_flag[1]:
               print("two temperatures model; Einstein temperatures: %5.1f, %5.1f (K)" % (self.fit2[0], self.fit2[1]))
 
-
-ein=einstein_class()
 my_plot=plot.plot_class('data_files')
 
 def einstein_fit(name, model=1):
 
-    ein.apfu=name.apfu
+    Einstein.set_apfu(name.apfu)
     guess=name.guess
     bounds=name.bounds
     
     if model==1:    
        guess=[guess]
-       ein_fit, ein_cov=curve_fit(ein.einstein_fun, name.x, name.y, bounds=bounds,\
+       ein_fit, ein_cov=curve_fit(Einstein.einstein_fun, name.x, name.y, bounds=bounds,\
                       p0=guess, xtol=1e-15, ftol=1e-15)
     else:
        guess=[guess, guess]
-       ein_fit, ein_cov=curve_fit(ein.einstein_2_fun, name.x, name.y, bounds=bounds,\
+       ein_fit, ein_cov=curve_fit(Einstein.einstein_2_fun, name.x, name.y, bounds=bounds,\
                       p0=guess, xtol=1e-15, ftol=1e-15)
         
     if model == 1:
@@ -123,18 +128,22 @@ def einstein_fit(name, model=1):
     if model == 1: 
        name.model=1
        name.fit1=[ein_fit[0]]
+       name.fit1_total=ein_fit
+       name.fit1_error=ein_cov
        name.fit_flag[0]=True
     else:
        name.model=2
        name.fit2=[ein_fit[0], ein_fit[1]]
+       name.fit2_total=ein_fit
+       name.fit2_error=ein_cov        
        name.fit_flag[1]=True
        
 def plot_fit(name):
     
     t_plot=np.linspace(name.minx, name.maxx, name.n_plot)
     
-    cv1_plot=np.array([ein.einstein_fun(it, name.fit1[0]) for it in t_plot])
-    cv2_plot=np.array([ein.einstein_2_fun(it, name.fit2[0], name.fit2[1]) for it in t_plot])
+    cv1_plot=np.array([Einstein.einstein_fun(it, name.fit1[0]) for it in t_plot])
+    cv2_plot=np.array([Einstein.einstein_2_fun(it, name.fit2[0], name.fit2[1]) for it in t_plot])
     
     x=[name.x, t_plot, t_plot]
     y=[name.y, cv1_plot, cv2_plot]
@@ -151,8 +160,8 @@ def compare_fit(name, plot=True):
        einstein_fit(name, model=2)
     
     print("")
-    model1=np.array([ein.einstein_fun(it, name.fit1[0]) for it in name.x])
-    model2=np.array([ein.einstein_2_fun(it, name.fit2[0], name.fit2[1]) for it in name.x])
+    model1=np.array([Einstein.einstein_fun(it, name.fit1[0]) for it in name.x])
+    model2=np.array([Einstein.einstein_2_fun(it, name.fit2[0], name.fit2[1]) for it in name.x])
     
     serie=[name.x, name.y, model1.round(2), model2.round(2)]
     df=pd.DataFrame(serie, index=['T  ', '   Cv Exp', ' model 1', ' model 2'])
