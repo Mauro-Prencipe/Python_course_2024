@@ -12,11 +12,11 @@ Notebooks should be followed in the order given below
 6)    classes
 7)    classes: advanced
 8)    least_squares
-9)    advanced_matplotlib
+9)    advanced_matplotlib  (optional)
 10)   General_fits
 11)   General_fit_revised
 12)   General_fit_revised_2
-13)   Logistic problem: a short glance at Sympy
+13)   Logistic problem: a short glance at Sympy (optional)
 
 
 The data_files folder contains data read or written by the codes in the notebooks.
