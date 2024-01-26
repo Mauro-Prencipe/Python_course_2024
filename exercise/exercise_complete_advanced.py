@@ -82,16 +82,23 @@ class Fit():
         print(data_frame.to_string(index=False), "\n")
         
     def info(self):
-        print("\nData set file:  %s     ", self.file)
-        print("Number of data:  %i3   ", self.size)
+        print("\nData set file:         ", self.file)
+        print("Number of data:       %3i" % self.size)
         if self.flag==True:
-            print("Polynomial fit coeff's ", self.fit)
+            print("Degree of fit:        %3i" % self.degree)
+            cfit=[self.fit[ic].round(4) for ic in range(self.degree+1)]
+            print("Polynomial fit coeff's ", cfit)
+            
+    
 
-my_data=Fit()
-my_data.set_dpi(100)
-my_data.read_data('exercise_data.dat')
-my_data.plot()
-my_data.table()
-my_data.info()
+def start(my_data_file='exercise_data.dat', degree=3, dpi=100):
+    
+    my_data=Fit()
+    my_data.set_dpi(dpi)
+    my_data.set_degree(degree)
+    my_data.read_data(my_data_file)
+    my_data.plot()
+    my_data.table()
+    my_data.info()
   
 
